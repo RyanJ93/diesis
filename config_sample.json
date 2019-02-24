@@ -1,0 +1,14 @@
+{
+  "source": "source/",
+  "destination": "destination/",
+  "verbose": true,
+  "remove_original": false,
+  "watermark": true,
+  "rename": false,
+  "overwrite": false,
+  "strict_meta": false,
+  "strict_lyrics": false,
+  "format": null,
+  "bitrate": null,
+  "recursive": false
+}
