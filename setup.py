@@ -1,14 +1,20 @@
-from distutils.core import setup
+import setuptools
 
-setup(
+
+with open('README.md', 'r') as description:
+    long_description = description.read()
+
+setuptools.setup(
     name='Diesis',
-    packages=['diesis'],
     version='0.0.1',
     license='MIT',
     description='A simple auto-tagging tool for precise music collectors.',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     author='Enrico Sola',
     author_email='info@enricosola.com',
     url='https://github.com/RyanJ93/diesis',
+    packages=setuptools.find_packages(),
     keywords=['music', 'tagging', 'id3', 'mp3', 'm4a', 'flac', 'ogg'],
     install_requires=[
         'mutagen',
