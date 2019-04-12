@@ -1,6 +1,7 @@
 from diesis.scrapers import LyricsScraper
 from urllib import parse, request
 from urllib.error import HTTPError
+from http.client import RemoteDisconnected
 from bs4 import BeautifulSoup
 from diesis import Config, Logger
 from typing import Tuple, Optional
@@ -29,7 +30,7 @@ class MusixMatch(LyricsScraper.LyricsScraper):
             })
             response = request.urlopen(req)
             contents: str = response.read()
-        except HTTPError as ex:
+        except (HTTPError, RemoteDisconnected) as ex:
             Logger.Logger.log_error(str(ex))
             Logger.Logger.log_error('Request failed for URL: ' + url)
             return ''
@@ -68,7 +69,7 @@ class MusixMatch(LyricsScraper.LyricsScraper):
             response = request.urlopen(req)
             # Load the HTML page contents.
             contents: str = response.read()
-        except HTTPError as ex:
+        except (HTTPError, RemoteDisconnected) as ex:
             Logger.Logger.log_error(str(ex))
             Logger.Logger.log_error('Request failed for URL: ' + url)
             return None, None

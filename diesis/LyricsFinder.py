@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Any
 from diesis import Song, Logger
 from diesis.scrapers import AZLyrics, MusixMatch
 
@@ -16,7 +16,7 @@ class LyricsFinder:
         :return: A tuple containing both the lyrics and its author(s) or both None if no lyrics is found.
         :rtype: Tuple[Optional[str], Optional[str]]
         """
-        scraper = None
+        scraper: Any = None
         if provider == 1:
             Logger.Logger.log('Querying "Azlyrics"...')
             scraper: AZLyrics.AZLyrics = AZLyrics.AZLyrics()
@@ -63,7 +63,7 @@ class LyricsFinder:
         lyrics: Tuple[Optional[str], Optional[str]] = (None, None)
         provider: int = 1
         # Start fetching the lyrics from the first provider and go on to other ones until found.
-        while not lyrics and provider <= 2:
+        while not lyrics[0] and provider <= 2:
             lyrics = self.__scrape(provider)
             provider += 1
         if lyrics[0]:

@@ -1,6 +1,7 @@
 from diesis.scrapers import LyricsScraper
 from urllib import parse, request
 from urllib.error import HTTPError
+from http.client import RemoteDisconnected
 from bs4 import BeautifulSoup
 from diesis import Config, Logger
 from typing import Tuple, Optional
@@ -28,7 +29,7 @@ class AZLyrics(LyricsScraper.LyricsScraper):
             })
             response = request.urlopen(req)
             contents: str = response.read()
-        except HTTPError as ex:
+        except (HTTPError, RemoteDisconnected) as ex:
             Logger.Logger.log_error(str(ex))
             Logger.Logger.log_error('Request failed for URL: ' + url)
             return ''
@@ -37,9 +38,11 @@ class AZLyrics(LyricsScraper.LyricsScraper):
         main = document.select_one('table.table-condensed')
         if main is None:
             return ''
-        # Find the link to the lyrics page.
-        result = main.select_one('a')
-        if main is None:
+        # Find the link to the lyrics page (according to this provider, links to lyrics should be opened in a new tab,
+        # then use this requirement to filter out invalid links,
+        # such as pagination links that come right before real results).
+        result = main.select_one('a[target="_blank"]')
+        if result is None:
             return ''
         # Returns the link as a text.
         return result.get('href').strip()
@@ -64,7 +67,7 @@ class AZLyrics(LyricsScraper.LyricsScraper):
             response = request.urlopen(req)
             # Load the HTML page contents.
             contents: str = response.read()
-        except HTTPError as ex:
+        except (HTTPError, RemoteDisconnected) as ex:
             Logger.Logger.log_error(str(ex))
             Logger.Logger.log_error('Request failed for URL: ' + url)
             return None, None
@@ -83,7 +86,7 @@ class AZLyrics(LyricsScraper.LyricsScraper):
         if eligible is not None:
             # If found, return its contents as a simple text without any HTML tag.
             lyrics: str = eligible.getText().strip()
-            lyrics_writer: str = None
+            lyrics_writer: Optional[str] = None
             # Get the element that contains the lyrics writer.
             writer_block = document.select_one('div.smt > small')
             if writer_block is not None:

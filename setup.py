@@ -6,7 +6,7 @@ with open('README.md', 'r') as description:
 
 setuptools.setup(
     name='Diesis',
-    version='0.0.1',
+    version='1.0.1',
     license='MIT',
     description='A simple auto-tagging tool for precise music collectors.',
     long_description=long_description,

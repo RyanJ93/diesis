@@ -10,8 +10,8 @@ class Config:
     USER_AGENT: str = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) ' \
                       'Chrome/35.0.1916.47 Safari/537.36 '
 
-    source: str = None
-    destination: str = None
+    source: Optional[str] = None
+    destination: Optional[str] = None
     verbose: bool = False
     remove_original: bool = False
     watermark: bool = True
@@ -19,10 +19,11 @@ class Config:
     overwrite: bool = False
     strict_meta: bool = False
     strict_lyrics: bool = False
-    format: str = None
-    bitrate: int = None
+    format: Optional[str] = None
+    bitrate: Optional[int] = None
     recursive: bool = False
     flatten: bool = False
+    log_file: Optional[str] = None
 
     @staticmethod
     def __validate() -> None:
@@ -30,7 +31,7 @@ class Config:
         Validates configuration parameters loaded before running the application.
         """
         if not Config.source or not os.path.exists(Config.source):
-            print('The given source directory does not exist, aborting.')
+            print('The given source file or directory does not exist, aborting.')
             quit()
 
     @staticmethod
@@ -169,6 +170,15 @@ class Config:
         return Config.flatten
 
     @staticmethod
+    def get_log_file() -> Optional[str]:
+        """
+        Returns the path to the file where log messages should be written in.
+        :return: A string containing the path to the log file or None if no path has been defined.
+        :rtype: Optional[str]
+        """
+        return Config.log_file
+
+    @staticmethod
     def setup_from_cli() -> None:
         """
         Parses and loads the given CLI arguments.
@@ -177,6 +187,12 @@ class Config:
             description='A simple auto-tagging tool for precise music collectors.'
         )
         # Set up the accepted arguments and options.
+        parser.add_argument(
+            'source',
+            metavar='source',
+            type=str,
+            help='the source directory containing the music files to process.'
+        )
         parser.add_argument(
             '--source',
             type=str,
@@ -251,6 +267,12 @@ class Config:
             action='store_true',
             help='using this option, folder hierarchy found in source will not be reproduced in destination directory.'
         )
+        parser.add_argument(
+            '--log_file',
+            nargs='?',
+            type=str,
+            help='the path to the log file where log messages should be written in.'
+        )
         # GET the CLI arguments based on the registered values.
         args = parser.parse_args()
         if args.config:
@@ -281,6 +303,8 @@ class Config:
             Config.format = args.format
         if args.bitrate and args.bitrate > 0:
             Config.bitrate = args.bitrate
+        if args.log_file:
+            Config.log_file = args.log_file
         # Validate all the loaded parameters before starting.
         Config.__validate()
 
@@ -295,7 +319,7 @@ class Config:
             raise ValueError('Invalid file path')
         # Open the given configuration file.
         with open(path, 'rb') as conf:
-            contents: str = conf.read()
+            contents: str = str(conf.read())
             # Parse its contents as JSON.
             data: Any = json.loads(contents)
             if 'source' in data and type(data['source']) is str and data['source']:

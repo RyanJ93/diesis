@@ -1,4 +1,4 @@
-from diesis import FileScanner, Config, main
+from diesis import main
 
 
 main.main()

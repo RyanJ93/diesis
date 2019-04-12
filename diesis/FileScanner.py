@@ -1,7 +1,7 @@
 from hashlib import md5
 from shutil import copyfile
 from datetime import datetime
-from typing import Set, Optional
+from typing import Set, Optional, List
 from pathlib import Path
 from diesis import Logger, Song, Config, TagHelper, Converter
 import tempfile
@@ -60,6 +60,8 @@ class FileScanner:
             base_dir: str = self.destination + '/' + directory
         else:
             base_dir: str = self.source + '/'
+        # Remove invalid characters from the user.
+        filename = filename.replace('/', '-').replace('\\', '-')
         path: str = base_dir + filename + extension
         # Check if existing file overwrite is allowed or if the new file name doesn't exists.
         if Config.Config.get_overwrite() and os.path.exists(path):
@@ -95,7 +97,7 @@ class FileScanner:
         else:
             context = ''
         # Get all the files contained within the given directory.
-        files: Set[str] = os.listdir(self.source + '/' + context)
+        files: List[str] = os.listdir(self.source + '/' + context)
         allowed_extensions: Set[str] = FileScanner.get_allowed_file_types()
         # Scan the directory.
         for file in files:
@@ -212,6 +214,14 @@ class FileScanner:
             self.destination = Config.Config.get_destination_directory()
         if self.source is None:
             raise ValueError('No source directory configured')
+        if not os.path.isdir(self.source):
+            # If a single file has been given instead of a whole directory, process it directly without looping.
+            directory: str = os.path.dirname(self.source)
+            filename: str = os.path.basename(self.source)
+            # Sets the directory where this file is contained as source directory, then process it.
+            self.source = directory
+            self.__process_song(filename)
+            return
         Logger.Logger.log('Loading files in ' + self.source)
         # Get the list of the files that are going to be processed.
         recursive: bool = Config.Config.get_recursive()

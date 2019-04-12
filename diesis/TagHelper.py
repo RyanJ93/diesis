@@ -49,10 +49,10 @@ class TagHelper:
         i: int = self.song.get_disc_number()
         total: int = self.song.get_disc_count()
         if i > 0 and total > 0:
-            tags['disc'] = (
-                TagHelper.__str(self.song.get_disc_number()),
-                TagHelper.__str(self.song.get_disc_count())
-            )
+            tags['disk'] = [(
+                self.song.get_disc_number(),
+                self.song.get_disc_count()
+            )]
         i = self.song.get_track_number()
         total = self.song.get_track_count()
         if i > 0 and total > 0:
@@ -246,7 +246,7 @@ class TagHelper:
         """
         Sets the song that will be processed.
         :param song: An instance of the class "Song" representing the song to process.
-        :type Song: song
+        :type song: Song
         """
         self.song = song
 

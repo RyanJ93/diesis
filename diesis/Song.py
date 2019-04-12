@@ -11,7 +11,7 @@ from diesis import LyricsFinder, Logger, Config, TagHelper, Converter
 
 
 class Song:
-    __QUERY_FILTERS: List[str] = [r'\[[\S\s]+\]', r'\(radio\s+edit\)']
+    __QUERY_FILTERS: List[str] = [r'\[[\S\s]+\]', r'\(radio\s+edit\)', r'^[0-9]+\.?']
 
     original_path: str = None
     path: str = None
@@ -148,8 +148,10 @@ class Song:
             # No title nor artist name available, use the filename as search query.
             filename: str = os.path.basename(self.original_path)
             filename = os.path.splitext(filename)[0]
-            query: str = filename.lower().strip()
+            query: str = filename.lower()
             query = re.sub(self.__get_filter_regex(), '', query)
+            query = query.replace('_', ' ')
+            query = query.strip()
             self.query = query
             self.minimal_query = re.sub(r'\([\s\S]+\)', '', query).strip()
             self.query_accuracy = 50
@@ -575,7 +577,7 @@ class Song:
             raise RuntimeError('No song has been defined.')
         # Prepare the API call.
         params: str = 'country=US&entity=song&limit=10&version=2&explicit=Yes&media=music'
-        url: str = 'https://itunes.apple.com/search?term=' + parse.quote(query) + '&' + params
+        url: str = 'https://itunes.apple.com/search?term=' + parse.quote_plus(query) + '&' + params
         try:
             # Send the request and load the returned contents.
             req = request.Request(url, headers={

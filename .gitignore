@@ -5,3 +5,5 @@ diesis/scrapers/__pycache__
 diesis/__init__.pyc
 Diesis.egg-info/
 dist/
+build/
+diesis/main.pyc
