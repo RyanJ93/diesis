@@ -188,9 +188,10 @@ class Config:
         )
         # Set up the accepted arguments and options.
         parser.add_argument(
-            'source',
+            'source_path',
             metavar='source',
             type=str,
+            nargs='?',
             help='the source directory containing the music files to process.'
         )
         parser.add_argument(
@@ -278,8 +279,13 @@ class Config:
         if args.config:
             Config.load_from_json(args.config)
         # Set up the configuration class.
-        Config.source = FileScanner.FileScanner.prepare_path(args.source)
-        Config.destination = FileScanner.FileScanner.prepare_path(args.dest)
+        source: Optional[str] = args.source
+        if not source and args.source_path:
+            source = args.source_path
+        if source:
+            Config.source = FileScanner.FileScanner.prepare_path(source)
+        if args.dest:
+            Config.destination = FileScanner.FileScanner.prepare_path(args.dest)
         if args.verbose is True:
             Config.verbose = True
         if args.remove_original is True:

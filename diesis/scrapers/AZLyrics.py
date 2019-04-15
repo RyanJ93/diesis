@@ -29,7 +29,7 @@ class AZLyrics(LyricsScraper.LyricsScraper):
             })
             response = request.urlopen(req)
             contents: str = response.read()
-        except (HTTPError, RemoteDisconnected) as ex:
+        except (HTTPError, RemoteDisconnected, TimeoutError) as ex:
             Logger.Logger.log_error(str(ex))
             Logger.Logger.log_error('Request failed for URL: ' + url)
             return ''
@@ -67,7 +67,7 @@ class AZLyrics(LyricsScraper.LyricsScraper):
             response = request.urlopen(req)
             # Load the HTML page contents.
             contents: str = response.read()
-        except (HTTPError, RemoteDisconnected) as ex:
+        except (HTTPError, RemoteDisconnected, TimeoutError) as ex:
             Logger.Logger.log_error(str(ex))
             Logger.Logger.log_error('Request failed for URL: ' + url)
             return None, None

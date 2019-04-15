@@ -585,7 +585,7 @@ class Song:
             })
             response = request.urlopen(req)
             contents: str = response.read()
-        except HTTPError as ex:
+        except (HTTPError, TimeoutError) as ex:
             Logger.Logger.log_error(str(ex))
             Logger.Logger.log_error('Request failed for URL: ' + url)
             return
@@ -615,7 +615,7 @@ class Song:
         try:
             request.urlretrieve(self.cover_url, filename)
             self.cover_path = filename
-        except HTTPError as ex:
+        except (HTTPError, TimeoutError) as ex:
             Logger.Logger.log_error(str(ex))
             Logger.Logger.log_error('Request failed for URL: ' + self.cover_url)
             self.cover_path = None
