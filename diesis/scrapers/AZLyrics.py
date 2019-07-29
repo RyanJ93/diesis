@@ -28,7 +28,7 @@ class AZLyrics(LyricsScraper.LyricsScraper):
                 'User-Agent': Config.Config.get_user_agent()
             })
             response = request.urlopen(req)
-            contents: str = response.read()
+            contents: str = response.read().decode('utf-8')
         except (HTTPError, RemoteDisconnected, TimeoutError) as ex:
             Logger.Logger.log_error(str(ex))
             Logger.Logger.log_error('Request failed for URL: ' + url)
@@ -66,7 +66,7 @@ class AZLyrics(LyricsScraper.LyricsScraper):
             })
             response = request.urlopen(req)
             # Load the HTML page contents.
-            contents: str = response.read()
+            contents: str = response.read().decode('utf-8')
         except (HTTPError, RemoteDisconnected, TimeoutError) as ex:
             Logger.Logger.log_error(str(ex))
             Logger.Logger.log_error('Request failed for URL: ' + url)

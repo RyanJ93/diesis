@@ -7,7 +7,7 @@ import json
 import re
 import os
 import tempfile
-from diesis import LyricsFinder, Logger, Config, TagHelper, Converter
+from diesis import LyricsFinder, Logger, Config, TagHelper, Converter, Utils
 
 
 class Song:
@@ -84,10 +84,11 @@ class Song:
             i += 1
         return index
 
-    def __set_info_from_itunes(self, data, query: str) -> None:
+    def __set_info_from_itunes(self, data: Any, query: str) -> None:
         """
         Loads information about this track from the most eligible result returned by the iTunes API.
         :param data: The whole response returned by iTunes.
+        :type data: Any
         :param query: A string representing the search query used to get such information.
         :type query: str
         """
@@ -584,7 +585,7 @@ class Song:
                 'User-Agent': Config.Config.get_user_agent()
             })
             response = request.urlopen(req)
-            contents: str = response.read()
+            contents: str = response.read().decode('utf-8')
         except (HTTPError, TimeoutError) as ex:
             Logger.Logger.log_error(str(ex))
             Logger.Logger.log_error('Request failed for URL: ' + url)
@@ -592,7 +593,8 @@ class Song:
         # Parse the response from the endpoint as a JSON encoded string
         data: Any = json.loads(contents)
         if data['resultCount'] == 0:
-            Logger.Logger.log('Song ' + self.title + ' not found (query: ' + self.query + ').')
+            title: str = Utils.Utils.str(self.title)
+            Logger.Logger.log('Song ' + title + ' not found (query: ' + Utils.Utils.str(self.query) + ').')
             return
         # Update the song properties according to information returned by iTunes.
         self.__set_info_from_itunes(data, query)
@@ -617,7 +619,7 @@ class Song:
             self.cover_path = filename
         except (HTTPError, TimeoutError) as ex:
             Logger.Logger.log_error(str(ex))
-            Logger.Logger.log_error('Request failed for URL: ' + self.cover_url)
+            Logger.Logger.log_error('Request failed for URL: ' + Utils.Utils.str(self.cover_url))
             self.cover_path = None
 
     def fetch_lyrics(self) -> None:

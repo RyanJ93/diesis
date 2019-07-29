@@ -3,7 +3,7 @@ from shutil import copyfile
 from datetime import datetime
 from typing import Set, Optional, List
 from pathlib import Path
-from diesis import Logger, Song, Config, TagHelper, Converter
+from diesis import Logger, Song, Config, TagHelper, Converter, Utils
 import tempfile
 import os
 
@@ -222,7 +222,7 @@ class FileScanner:
             self.source = directory
             self.__process_song(filename)
             return
-        Logger.Logger.log('Loading files in ' + self.source)
+        Logger.Logger.log('Loading files in ' + Utils.Utils.str(self.source))
         # Get the list of the files that are going to be processed.
         recursive: bool = Config.Config.get_recursive()
         file_list: Set[str] = self.__load_eligible_files(recursive)
