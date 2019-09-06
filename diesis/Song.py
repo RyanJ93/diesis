@@ -565,20 +565,16 @@ class Song:
             return self.minimal_query
         return self.query
 
-    def fetch_info(self, minimal: bool = False) -> None:
+    @staticmethod
+    def __fetch_from_url(url: str) -> Any:
         """
-        Fetch song information from the iTunes APIs based on the generated search query.
-        :param minimal: If set to "True" the simpler search query version will be used instead of the complete one.
-        :type minimal: bool
-        :raise RuntimeError: If no song file has been defined.
+        Fetches the song information from a given iTunes URL.
+        :param url: A string containing the URL where information must be fetched from.
+        :type url: str
+        :return: The JSON response or None if the response doesn't contain any result.
+        :rtype: Any
         """
-        self.found = False
-        query: str = self.get_query(minimal)
-        if not query:
-            raise RuntimeError('No song has been defined.')
-        # Prepare the API call.
-        params: str = 'country=US&entity=song&limit=10&version=2&explicit=Yes&media=music'
-        url: str = 'https://itunes.apple.com/search?term=' + parse.quote_plus(query) + '&' + params
+        song_information: Any = None
         try:
             # Send the request and load the returned contents.
             req = request.Request(url, headers={
@@ -592,7 +588,34 @@ class Song:
             return
         # Parse the response from the endpoint as a JSON encoded string
         data: Any = json.loads(contents)
-        if data['resultCount'] == 0:
+        # Check if response contains at least one result, otherwise return "None".
+        if data['resultCount'] > 0:
+            song_information = data
+        return song_information
+
+    def fetch_info(self, minimal: bool = False) -> None:
+        """
+        Fetch song information from the iTunes APIs based on the generated search query.
+        :param minimal: If set to "True" the simpler search query version will be used instead of the complete one.
+        :type minimal: bool
+        :raise RuntimeError: If no song file has been defined.
+        """
+        self.found = False
+        query: str = self.get_query(minimal)
+        if not query:
+            raise RuntimeError('No song has been defined.')
+        # Prepare the API call.
+        data: Any = None
+        # Generate a list of english countries as alternatives to US to use whenever no result for a song is found.
+        countries: List[str] = ['US', 'GB', 'AU']
+        for country in countries:
+            params: str = 'country=' + country + '&entity=song&limit=10&version=2&explicit=Yes&media=music'
+            url: str = 'https://itunes.apple.com/search?term=' + parse.quote_plus(query) + '&' + params
+            # Load results from iTunes API endpoint.
+            data = Song.__fetch_from_url(url)
+            if data:
+                break
+        if not data:
             title: str = Utils.Utils.str(self.title)
             Logger.Logger.log('Song ' + title + ' not found (query: ' + Utils.Utils.str(self.query) + ').')
             return
