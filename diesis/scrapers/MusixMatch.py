@@ -75,21 +75,27 @@ class MusixMatch(LyricsScraper.LyricsScraper):
             return None, None
         # Parse the HTML page.
         document = BeautifulSoup(contents, 'html.parser')
-        main = document.select_one('p.mxm-lyrics__content')
-        if main is None:
-            return None, None
-        # Get the element that contains the song lyrics.
-        inner = main.select_one('span')
-        if inner is None:
-            return None, None
-        # If found, get its contents as a simple text without any HTML tag.
-        lyrics: str = inner.getText().strip()
+        lyrics: str = ''
         lyrics_writer: str = ''
+        # Look up all the blocks containing the song lyrics.
+        blocks = document.select('p.mxm-lyrics__content')
+        if len(blocks) > 0:
+            for block in blocks:
+                # Concat the contents of every block found.
+                inner = block.select_one('span')
+                if inner is not None:
+                    lyrics += '\n' + inner.getText().strip()
+        lyrics = lyrics.strip()
+        if lyrics is None:
+            return None, None
         # Get the element that contains the lyrics writer.
         writer_block = document.select_one('p.mxm-lyrics__copyright')
         if writer_block is not None:
             # If the element containing the lyrics author is found, get its value and format the name(s) found in it.
             lyrics_writer = writer_block.getText().strip().lower().title()
+            # Clean up the lyrics author string.
+            if lyrics_writer.index('Writer(S): ') == 0:
+                lyrics_writer = lyrics_writer[11:]
         return lyrics, lyrics_writer
 
     def fetch(self) -> None:

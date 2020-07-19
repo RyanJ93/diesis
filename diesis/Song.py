@@ -60,7 +60,7 @@ class Song:
         :type data: List[Dict[str, str]]
         :param query: A string containing the original query used to find song information through iTunes.
         :type query: str
-        :return: An integer number representing the index of the closes entry found.
+        :return: An integer number representing the index of the closest entry found.
         :rtype: int
         """
         # Split the search query into words.
@@ -69,10 +69,19 @@ class Song:
         min_length: int = 0
         index: int = 0
         i: int = 0
+        query_ci: str = query.lower()
         # Check each result.
         for result in data:
-            # Get all the words contained i the title according to iTunes.
-            title_words: List[str] = re.findall(r'[\w\']+', result['trackName'].lower())
+            track_name_ci: str = result['trackName'].lower()
+            artist_name_ci: str = result['artistName'].lower()
+            if query_ci == track_name_ci:
+                # This result matches the search query, use it.
+                break
+            if query_ci == (track_name_ci + ' ' + artist_name_ci) or query_ci == (artist_name_ci + ' ' + track_name_ci):
+                # This result's track name and artist name values combined together matches the search query, use it.
+                break
+            # Get all the words contained within the title according to iTunes.
+            title_words: List[str] = re.findall(r'[\w\']+', track_name_ci)
             title_length: int = len(title_words)
             # Find the common words between the words contained in the query and the words contained in this title.
             score: int = len(list(set(title_words) & set(words)))
@@ -609,7 +618,7 @@ class Song:
         # Generate a list of english countries as alternatives to US to use whenever no result for a song is found.
         countries: List[str] = ['US', 'GB', 'AU']
         for country in countries:
-            params: str = 'country=' + country + '&entity=song&limit=10&version=2&explicit=Yes&media=music'
+            params: str = 'country=' + country + '&entity=song&limit=100&version=2&explicit=Yes&media=music'
             url: str = 'https://itunes.apple.com/search?term=' + parse.quote_plus(query) + '&' + params
             # Load results from iTunes API endpoint.
             data = Song.__fetch_from_url(url)

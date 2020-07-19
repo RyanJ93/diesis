@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5] - 2020-07-19
+
+### Changed
+
+- Improved iTunes API's results filtering.
+- Fixed a bug causing song lyrics from MusixMatch to be truncated.
+- The "Writer(S): " prefix in MusixMatch's results is now removed from the lyrics author name.
+
 ## [1.0.4] - 2019-09-07
 
 ### Changed
